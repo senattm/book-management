@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model authors {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullname  String    @db.VarChar(255)
+  bio       String?
+  createdat DateTime  @default(now()) @db.Timestamptz(6)
+  updatedat DateTime  @default(now()) @db.Timestamptz(6)
+  deletedat DateTime? @db.Timestamptz(6)
+  books     books[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model books {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String       @db.VarChar(255)
+  isbn        String       @unique @db.VarChar(17)
+  description String?
+  authorid    String       @db.Uuid
+  categoryid  String       @db.Uuid
+  publishedat DateTime?    @db.Date
+  stock       Int          @default(0)
+  createdat   DateTime     @default(now()) @db.Timestamptz(6)
+  updatedat   DateTime     @default(now()) @db.Timestamptz(6)
+  deletedat   DateTime?    @db.Timestamptz(6)
+  authors     authors      @relation(fields: [authorid], references: [id], onUpdate: NoAction)
+  categories  categories   @relation(fields: [categoryid], references: [id], onUpdate: NoAction)
+  borrowings  borrowings[]
+  reviews     reviews[]
+
+  @@index([authorid], map: "idx_books_authorid")
+  @@index([categoryid], map: "idx_books_categoryid")
+}
+
+model borrowings {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userid     String    @db.Uuid
+  bookid     String    @db.Uuid
+  borrowedat DateTime  @default(now()) @db.Timestamptz(6)
+  dueat      DateTime  @db.Timestamptz(6)
+  returnedat DateTime? @db.Timestamptz(6)
+  createdat  DateTime  @default(now()) @db.Timestamptz(6)
+  updatedat  DateTime  @default(now()) @db.Timestamptz(6)
+  deletedat  DateTime? @db.Timestamptz(6)
+  books      books     @relation(fields: [bookid], references: [id], onUpdate: NoAction)
+  users      users     @relation(fields: [userid], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([dueat], map: "idx_borrowings_dueat")
+  @@index([userid], map: "idx_borrowings_userid")
+}
+
+model categories {
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  categoryname     String       @db.VarChar(255)
+  parentid         String?      @db.Uuid
+  createdat        DateTime     @default(now()) @db.Timestamptz(6)
+  updatedat        DateTime     @default(now()) @db.Timestamptz(6)
+  deletedat        DateTime?    @db.Timestamptz(6)
+  books            books[]
+  categories       categories?  @relation("categoriesTocategories", fields: [parentid], references: [id], onUpdate: NoAction)
+  other_categories categories[] @relation("categoriesTocategories")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reviews {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userid    String    @db.Uuid
+  bookid    String    @db.Uuid
+  rating    Int
+  comment   String?
+  createdat DateTime  @default(now()) @db.Timestamptz(6)
+  updatedat DateTime  @default(now()) @db.Timestamptz(6)
+  deletedat DateTime? @db.Timestamptz(6)
+  books     books     @relation(fields: [bookid], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users     users     @relation(fields: [userid], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([bookid], map: "idx_reviews_bookid")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model users {
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String       @db.VarChar(255)
+  email      String       @unique @db.VarChar(255)
+  password   String       @db.VarChar(255)
+  role       String       @default("user") @db.VarChar(10)
+  createdat  DateTime     @default(now()) @db.Timestamptz(6)
+  updatedat  DateTime     @default(now()) @db.Timestamptz(6)
+  deletedat  DateTime?    @db.Timestamptz(6)
+  borrowings borrowings[]
+  reviews    reviews[]
+}
