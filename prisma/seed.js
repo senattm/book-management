@@ -69,16 +69,12 @@ async function main() {
       { fullname: "George Orwell", bio: "English novelist and essayist." },
       { fullname: "Frank Herbert", bio: "American science-fiction author." },
       { fullname: "J.R.R. Tolkien", bio: "English writer, poet, philologist." },
-      {
-        fullname: "Fyodor Dostoevsky",
-        bio: "Russian novelist and philosopher.",
+      { fullname: "Fyodor Dostoevsky", bio: "Russian novelist and philosopher.",
       },
       { fullname: "Jane Austen", bio: "English novelist known for realism." },
       { fullname: "Albert Camus", bio: "French philosopher and author." },
       { fullname: "Yuval Noah Harari", bio: "Historian and author." },
-      {
-        fullname: "Mary Shelley",
-        bio: "English novelist who wrote Frankenstein.",
+      { fullname: "Mary Shelley", bio: "English novelist who wrote Frankenstein.",
       },
       { fullname: "Unknown Author", bio: null },
     ];
@@ -196,55 +192,55 @@ async function main() {
       booksData.map((b) => prisma.books.create({ data: b }))
     );
 
-await prisma.reviews.createMany({
+    await prisma.reviews.createMany({
       data: [
         {
-          userid: user1.id,            
-          bookid: createdBooks[0].id, 
+          userid: user1.id,
+          bookid: createdBooks[0].id,
           rating: 5,
-          comment: 'Çok etkileyici bir kitap!',
+          comment: "Çok etkileyici bir kitap!",
         },
         {
           userid: user2.id,
           bookid: createdBooks[1].id,
           rating: 4,
-          comment: 'Evreni harika kurgulanmış.',
+          comment: "Evreni harika kurgulanmış.",
         },
         {
           userid: user1.id,
           bookid: createdBooks[2].id,
           rating: 5,
-          comment: 'Çocukken okumuştum, hâlâ güzel.',
+          comment: "Çocukken okumuştum, hâlâ güzel.",
         },
         {
           userid: user2.id,
           bookid: createdBooks[3].id,
           rating: 5,
-          comment: 'Ağır ama müthiş bir eser.',
+          comment: "Ağır ama müthiş bir eser.",
         },
         {
           userid: admin.id,
           bookid: createdBooks[4].id,
           rating: 4,
-          comment: 'Klasiklerin klasiği.',
+          comment: "Klasiklerin klasiği.",
         },
         {
           userid: user1.id,
           bookid: createdBooks[5].id,
           rating: 4,
-          comment: 'Absürd ve düşündürücü.',
+          comment: "Absürd ve düşündürücü.",
         },
         {
           userid: user2.id,
           bookid: createdBooks[6].id,
           rating: 5,
-          comment: 'Tarihi çok iyi özetliyor.',
+          comment: "Tarihi çok iyi özetliyor.",
         },
         {
           userid: admin.id,
           bookid: createdBooks[7].id,
           rating: 4,
-          comment: 'Karanlık ama iyi yazılmış.',
+          comment: "Karanlık ama iyi yazılmış.",
         },
         {
           userid: user1.id,
@@ -314,7 +310,7 @@ await prisma.reviews.createMany({
       ],
     });
 
- console.log("Seed başarılı");
+    console.log("Seed başarılı");
   } catch (error) {
     console.error("Seed hatası:", error);
     throw error;

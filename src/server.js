@@ -1,25 +1,26 @@
+require('dotenv').config();
+const app = require('./app');
+const { prisma, connectDB } = require('./config/database');
+
+const PORT = process.env.PORT || 3000;
+
 (async () => {
   try {
-    await connectDB();
+    if (connectDB) await connectDB();
 
     const server = app.listen(PORT, () => {
       console.log(`Sunucu çalışıyor: http://localhost:${PORT}`);
     });
 
     const gracefulShutdown = async () => {
-      console.log('Sunucu kapatılıyor...');
-      await prisma.$disconnect();
-      server.close(() => {
-        console.log('Bağlantılar kesildi, süreç sonlandırıldı.');
-        process.exit(0);
-      });
+      await prisma?.$disconnect();
+      server.close(() => process.exit(0));
     };
 
     process.on('SIGINT', gracefulShutdown);
     process.on('SIGTERM', gracefulShutdown);
-
-  } catch (error) {
-    console.error("Uygulama başlatılamadı:", error);
-    process.exit(1); 
+  } catch (err) {
+    console.error('Uygulama başlatılamadı:', err);
+    process.exit(1);
   }
 })();
