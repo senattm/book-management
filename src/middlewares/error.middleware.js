@@ -1,13 +1,34 @@
 const errorMiddleware = (err, req, res, next) => {
-const status = err.statusCode || 500;
-const message = err.message || "Sunucu tarafında bir hata oluştu.";
+  const statusCode = err.statusCode || 500;
 
-console.error(`[HATA]: ${message}`);
+  const defaultCodeByStatus = {
+    400: "VALIDATION_ERROR",
+    401: "UNAUTHORIZED",
+    403: "FORBIDDEN",
+    404: "NOT_FOUND",
+    409: "CONFLICT",
+    429: "RATE_LIMIT",
+    500: "INTERNAL_SERVER_ERROR",
+  };
 
-res.status(status).json({
+  const errorCode =
+    err.code || defaultCodeByStatus[statusCode] || "INTERNAL_SERVER_ERROR";
+
+  const errorResponse = {
     success: false,
-    error: message
-});
+    error: {
+      code: errorCode,
+      message: err.message || "Sunucu tarafında bir hata oluştu.",
+      details: err.details || [],
+    },
+    timestamp: new Date().toISOString(),
+    path: req.originalUrl,
+  };
+
+  console.error(
+    `[ERROR] ${errorResponse.error.code}: ${errorResponse.error.message}`
+  );
+  return res.status(statusCode).json(errorResponse);
 };
 
 module.exports = errorMiddleware;
