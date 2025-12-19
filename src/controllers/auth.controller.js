@@ -1,4 +1,5 @@
 const authService = require("../services/auth.service");
+const ApiResponse = require("../utils/ApiResponse");  
 
 const register = async (req, res, next) => {
   try {
