@@ -11,6 +11,9 @@ const validate = (schema) => {
       const err = new Error("Geçersiz input");
       err.statusCode = 400;
       err.code = "VALIDATION_ERROR";
+
+      const issues = error?.errors || error?.issues || [];
+
       err.details = error.errors.map((e) => ({
         field: e.path.join("."),
         message: e.message,

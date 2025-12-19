@@ -1,5 +1,4 @@
 const { z } = require("zod");
-const validate = require("../middlewares/validate.middleware"); // yolun farklıysa düzelt
 
 const createBookSchema = z.object({
   body: z.object({
@@ -15,14 +14,12 @@ const createBookSchema = z.object({
       .regex(/^[\d-]{10,17}$/, "Geçersiz ISBN formatı."),
 
     authorid: z
-      .number({ required_error: "Yazar ID zorunludur." })
-      .int()
-      .positive("Geçerli bir yazar ID giriniz."),
+      .string({ required_error: "Yazar ID zorunludur." })
+      .uuid("Geçerli bir yazar ID giriniz."),
 
     categoryid: z
-      .number({ required_error: "Kategori ID zorunludur." })
-      .int()
-      .positive("Geçerli bir kategori ID giriniz."),
+      .string({ required_error: "Kategori ID zorunludur." })
+      .uuid("Geçerli bir kategori ID giriniz."),
 
     description: z
       .string()
@@ -43,6 +40,4 @@ const createBookSchema = z.object({
   }),
 });
 
-const createBookValidationRules = validate(createBookSchema);
-
-module.exports = { createBookSchema, createBookValidationRules };
+module.exports = { createBookSchema };
