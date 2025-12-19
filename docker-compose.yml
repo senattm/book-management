@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: bookpass
       POSTGRES_DB: bookdb
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - bm_pgdata:/var/lib/postgresql/data
 
@@ -36,7 +36,7 @@ services:
       JWT_REFRESH_SECRET: "dev_jwt_refresh_secret"
 
     volumes:
-      - .:/app
+      - .:/app.pş*
       - /app/node_modules
 
     command: sh -c "npx prisma migrate deploy && npm run dev"
