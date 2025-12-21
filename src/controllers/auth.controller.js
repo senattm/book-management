@@ -30,12 +30,15 @@ const refresh = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    const data = await authService.logout(req.user.id);
+    const data = await authService.logout({
+      refreshToken: req.body.refreshToken,
+    });
     return res.status(200).json(new ApiResponse(data, "Çıkış başarılı"));
   } catch (err) {
     next(err);
   }
 };
+
 
 const forgotPassword = async (req, res, next) => {
   try {

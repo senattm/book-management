@@ -25,6 +25,12 @@ const refreshSchema = z.object({
   }),
 });
 
+const logoutSchema = z.object({
+  body: z.object({
+    refreshToken: z.string().min(1, "Refresh token zorunludur"),
+  }),
+});
+
 const forgotPasswordSchema = z.object({
   body: z.object({
     email: z.string().email("Geçersiz email formatı"),
@@ -43,4 +49,4 @@ const resetPasswordSchema = z.object({
 });
 
 
-module.exports = { registerSchema, loginSchema, refreshSchema, forgotPasswordSchema, resetPasswordSchema };
+module.exports = { registerSchema, loginSchema, refreshSchema, logoutSchema, forgotPasswordSchema, resetPasswordSchema };
