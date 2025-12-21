@@ -1,21 +1,25 @@
 const validate = (schema) => {
-  return (req, res, next) => {
+  return (req, _res, next) => {
     try {
-      schema.parse({
+      const parsed = schema.parse({
         body: req.body,
         query: req.query,
         params: req.params,
       });
+
+      req.body = parsed.body ?? req.body;
+      req.query = parsed.query ?? req.query;
+      req.params = parsed.params ?? req.params;
+
       next();
     } catch (error) {
       const err = new Error("Geçersiz input");
       err.statusCode = 400;
       err.code = "VALIDATION_ERROR";
+      const issues = error?.issues || [];
 
-      const issues = error?.errors || error?.issues || [];
-
-      err.details = error.errors.map((e) => ({
-        field: e.path.join("."),
+      err.details = issues.map((e) => ({
+        field: (e.path || []).join("."),
         message: e.message,
       }));
       next(err);
