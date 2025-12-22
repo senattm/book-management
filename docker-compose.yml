@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: bookpass
       POSTGRES_DB: bookdb
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - bm_pgdata:/var/lib/postgresql/data
 
@@ -26,19 +26,16 @@ services:
     ports:
       - "3000:3000"
     environment:
+      NODE_ENV: "development"
       PORT: "3000"
-
       DATABASE_URL: "postgresql://book:bookpass@postgres:5432/bookdb?schema=public"
       REDIS_URL: "redis://redis:6379"
       REDIS_TTL: "60"
-
       JWT_SECRET: "dev_jwt_secret"
       JWT_REFRESH_SECRET: "dev_jwt_refresh_secret"
-
     volumes:
-      - .:/app.pş*
+      - .:/app
       - /app/node_modules
-
     command: sh -c "npx prisma migrate deploy && npm run dev"
 
 volumes:
