@@ -6,17 +6,19 @@ const createBookSchema = z.object({
       .string({ required_error: "Kitap başlığı zorunludur." })
       .trim()
       .min(1, "Kitap başlığı en az 1 karakter olmalıdır.")
-      .max(255, "Kitap başlığı en fazla 255 karakter olabilir."),
+      .max(255),
 
     isbn: z
       .string({ required_error: "ISBN alanı zorunludur." })
       .trim()
-      .regex(/^[\d-]{10,17}$/, "Geçersiz ISBN formatı."),
+      .regex(
+        /^[\d-]{10,17}$/,
+        "Geçersiz ISBN formatı (10-17 karakter, rakam ve tire)."
+      ),
 
     authorid: z
       .string({ required_error: "Yazar ID zorunludur." })
       .uuid("Geçerli bir yazar ID giriniz."),
-
     categoryid: z
       .string({ required_error: "Kategori ID zorunludur." })
       .uuid("Geçerli bir kategori ID giriniz."),
@@ -35,9 +37,53 @@ const createBookSchema = z.object({
     stock: z.coerce
       .number()
       .int("Stok tam sayı olmalı.")
-      .min(0, "Stok miktarı negatif olamaz.")
+      .min(0, "Stok negatif olamaz.")
       .default(0),
   }),
 });
 
-module.exports = { createBookSchema };
+const listBooksSchema = z.object({
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    sort: z.string().optional(), 
+    category: z.string().uuid().optional(),
+    search: z.string().trim().optional(),
+  }),
+});
+
+const bookIdParamSchema = z.object({
+  params: z.object({
+    id: z.string().uuid("Geçerli bir kitap ID giriniz."),
+  }),
+});
+
+const updateBookSchema = z.object({
+  params: z.object({
+    id: z.string().uuid("Geçerli bir kitap ID giriniz."),
+  }),
+  body: z
+    .object({
+      title: z.string().trim().min(1).max(255).optional(),
+      isbn: z
+        .string()
+        .trim()
+        .regex(/^[\d-]{10,17}$/)
+        .optional(),
+      authorid: z.string().uuid().optional(),
+      categoryid: z.string().uuid().optional(),
+      description: z.string().trim().max(2000).nullable().optional(),
+      publishedat: z.coerce.date().max(new Date()).nullable().optional(),
+      stock: z.coerce.number().int().min(0).optional(),
+    })
+    .refine((obj) => Object.keys(obj).length > 0, {
+      message: "Güncelleme için en az 1 alan göndermelidir.",
+    }),
+});
+
+module.exports = {
+  createBookSchema,
+  listBooksSchema,
+  bookIdParamSchema,
+  updateBookSchema,
+};
