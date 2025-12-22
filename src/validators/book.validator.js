@@ -46,11 +46,13 @@ const listBooksSchema = z.object({
   query: z.object({
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(10),
-    sort: z.string().optional(), 
-    category: z.string().uuid().optional(),
     search: z.string().trim().optional(),
+    authorid: z.string().uuid().optional(),
+    categoryid: z.string().uuid().optional(),
   }),
 });
+
+
 
 const bookIdParamSchema = z.object({
   params: z.object({

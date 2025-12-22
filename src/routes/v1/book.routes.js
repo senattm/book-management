@@ -1,14 +1,5 @@
 const router = require("express").Router();
-
-const {
-  createBookHandler,
-  listBooksHandler,
-  getBookByIdHandler,
-  updateBookHandler,
-  deleteBookHandler,
-  getBookReviewsHandler
-} = require("../../controllers/book.controller");
-
+const bookController = require("../../controllers/book.controller");
 const validate = require("../../middlewares/validate.middleware");
 const { authenticate, authorize } = require("../../middlewares/auth.middleware");
 const {
@@ -18,33 +9,12 @@ const {
   updateBookSchema,
 } = require("../../validators/book.validator");
 
-router.get("/", validate(listBooksSchema), listBooksHandler);
+router.get("/", validate(listBooksSchema), bookController.getAllBooks);
+router.get("/:id", validate(bookIdParamSchema), bookController.getBookById);
+router.get("/:id/reviews", validate(bookIdParamSchema), bookController.getBookReviews);
 
-router.get("/:id", validate(bookIdParamSchema), getBookByIdHandler);
-
-router.get("/:id/reviews", validate(bookIdParamSchema), getBookReviewsHandler);
-router.post(
-  "/",
-  authenticate,
-  authorize("admin"),
-  validate(createBookSchema),
-  createBookHandler
-);
-
-router.put(
-  "/:id",
-  authenticate,
-  authorize("admin"),
-  validate(updateBookSchema),
-  updateBookHandler
-);
-
-router.delete(
-  "/:id",
-  authenticate,
-  authorize("admin"),
-  validate(bookIdParamSchema),
-  deleteBookHandler
-);
+router.post("/", authenticate, authorize("admin"), validate(createBookSchema), bookController.createBook);
+router.put("/:id", authenticate, authorize("admin"), validate(updateBookSchema), bookController.updateBook);
+router.delete("/:id", authenticate, authorize("admin"), validate(bookIdParamSchema), bookController.deleteBook);
 
 module.exports = router;

@@ -1,71 +1,65 @@
-const {
-  createBook,
-  listBooks,
-  getBookById,
-  updateBook,
-  softDeleteBook,
-  getBookReviews
-} = require("../services/book.service");
+const bookService = require("../services/book.service");
+const ApiResponse = require("../utils/ApiResponse");
 
-const createBookHandler = async (req, res, next) => {
+const createBook = async (req, res, next) => {
   try {
-    const created = await createBook(req.body);
-    return res.status(201).json({ success: true, data: created });
+    const data = await bookService.createBook(req.body);
+    return res.status(201).json(new ApiResponse(data, "Kitap başarıyla oluşturuldu"));
   } catch (err) {
     next(err);
   }
 };
 
-const listBooksHandler = async (req, res, next) => {
+const getAllBooks = async (req, res, next) => {
   try {
-    const result = await listBooks(req.query);
-    return res.status(200).json({ success: true, data: result.items, pagination: result.pagination,});
+    const result = await bookService.listBooks(req.query);
+    return res.status(200).json(new ApiResponse(result.items, null, result.pagination));
   } catch (err) {
     next(err);
   }
 };
 
-const getBookByIdHandler = async (req, res, next) => {
+const getBookById = async (req, res, next) => {
   try {
-    const book = await getBookById(req.params.id);
-    return res.status(200).json({ success: true, data: book });
+    const data = await bookService.getBookById(req.params.id);
+    return res.status(200).json(new ApiResponse(data));
   } catch (err) {
     next(err);
   }
 };
 
-const updateBookHandler = async (req, res, next) => {
+const updateBook = async (req, res, next) => {
   try {
-    const updated = await updateBook(req.params.id, req.body);
-    return res.status(200).json({ success: true, data: updated });
+    const data = await bookService.updateBook(req.params.id, req.body);
+    return res.status(200).json(new ApiResponse(data, "Kitap başarıyla güncellendi"));
   } catch (err) {
     next(err);
   }
 };
 
-const deleteBookHandler = async (req, res, next) => {
+const deleteBook = async (req, res, next) => {
   try {
-    const deleted = await softDeleteBook(req.params.id);
-    return res.status(200).json({ success: true, data: deleted });
+    await bookService.softDeleteBook(req.params.id);
+    return res.status(200).json(new ApiResponse(null, "Kitap başarıyla silindi"));
   } catch (err) {
     next(err);
   }
 };
 
-const getBookReviewsHandler = async (req, res, next) => {
+const getBookReviews = async (req, res, next) => {
   try {
-    const reviews = await getBookReviews(req.params.id);
-    return res.status(200).json({  success: true,  data: reviews, });
+    const data = await bookService.getBookReviews(req.params.id);
+    return res.status(200).json(new ApiResponse(data));
   } catch (err) {
     next(err);
   }
 };
 
 module.exports = {
-  createBookHandler,
-  listBooksHandler,
-  getBookByIdHandler,
-  updateBookHandler,
-  deleteBookHandler,
-  getBookReviewsHandler,
+  createBook,
+  getAllBooks,
+  getBookById,
+  updateBook,
+  deleteBook,
+  getBookReviews,
 };
