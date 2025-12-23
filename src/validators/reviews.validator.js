@@ -2,13 +2,13 @@ const { z } = require("zod");
 
 const reviewIdParamSchema = z.object({
   params: z.object({
-    id: z.string().uuid("Geçerli bir review ID giriniz."),
+    id: z.uuid("Geçerli bir review ID giriniz."),
   }),
 });
 
 const createReviewSchema = z.object({
   params: z.object({
-    id: z.string().uuid("Geçerli bir kitap ID giriniz."), 
+    id: z.uuid("Geçerli bir kitap ID giriniz."), 
   }),
   body: z.object({
     rating: z.coerce
@@ -26,7 +26,7 @@ const createReviewSchema = z.object({
 
 const updateReviewSchema = z.object({
   params: z.object({
-    id: z.string().uuid("Geçerli bir review ID giriniz."),
+    id: z.uuid("Geçerli bir review ID giriniz."),
   }),
   body: z
     .object({
@@ -52,8 +52,8 @@ const getAllReviewsSchema = z.object({
   query: z.object({
     page: z.coerce.number().int().positive().default(1).optional(),
     limit: z.coerce.number().int().positive().max(100).default(10).optional(),
-    bookId: z.string().uuid("Geçerli bir kitap ID giriniz.").optional(),
-    userId: z.string().uuid("Geçerli bir kullanıcı ID giriniz.").optional(),
+    bookId: z.uuid("Geçerli bir kitap ID giriniz.").optional(),
+    userId: z.uuid("Geçerli bir kullanıcı ID giriniz.").optional(),
   }),
 });
 

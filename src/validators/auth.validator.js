@@ -3,7 +3,7 @@ const { z } = require("zod");
 const registerSchema = z.object({
   body: z.object({
     name: z.string().min(2, "İsim en az 2 karakter olmalı"),
-    email: z.string().email("Geçersiz email formatı"),
+    email: z.email("Geçersiz email formatı"),
     password: z.string()
       .min(8, "Şifre en az 8 karakter olmalı")
       .regex(/[a-z]/, "Şifre en az bir küçük harf içermelidir")
@@ -14,7 +14,7 @@ const registerSchema = z.object({
 
 const loginSchema = z.object({
   body: z.object({
-    email: z.string().email("Geçersiz email formatı"),
+    email: z.email("Geçersiz email formatı"),
     password: z.string().min(1, "Şifre gereklidir"),
   }),
 });
@@ -33,7 +33,7 @@ const logoutSchema = z.object({
 
 const forgotPasswordSchema = z.object({
   body: z.object({
-    email: z.string().email("Geçersiz email formatı"),
+    email: z.email("Geçersiz email formatı"),
   }),
 });
 

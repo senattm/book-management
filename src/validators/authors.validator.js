@@ -2,7 +2,7 @@ const { z } = require("zod");
 
 const authorIdParamSchema = z.object({
   params: z.object({
-    id: z.string().uuid("Geçerli bir yazar ID giriniz."),
+    id: z.uuid("Geçerli bir yazar ID giriniz."),
   }),
 });
 
@@ -23,7 +23,7 @@ const createAuthorSchema = z.object({
 
 const updateAuthorSchema = z.object({
   params: z.object({
-    id: z.string().uuid("Geçerli bir yazar ID giriniz."),
+    id: z.uuid("Geçerli bir yazar ID giriniz."),
   }),
   body: z
     .object({

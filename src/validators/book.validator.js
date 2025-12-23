@@ -16,12 +16,8 @@ const createBookSchema = z.object({
         "Geçersiz ISBN formatı (10-17 karakter, rakam ve tire)."
       ),
 
-    authorid: z
-      .string({ required_error: "Yazar ID zorunludur." })
-      .uuid("Geçerli bir yazar ID giriniz."),
-    categoryid: z
-      .string({ required_error: "Kategori ID zorunludur." })
-      .uuid("Geçerli bir kategori ID giriniz."),
+   authorid: z.uuid("Geçerli bir yazar ID giriniz."),
+  categoryid: z.uuid("Geçerli bir kategori ID giriniz."),
 
     description: z
       .string()
@@ -47,8 +43,8 @@ const listBooksSchema = z.object({
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(10),
     search: z.string().trim().optional(),
-    authorid: z.string().uuid().optional(),
-    categoryid: z.string().uuid().optional(),
+    authorid: z.uuid().optional(),
+    categoryid: z.uuid().optional(),
   }),
 });
 
@@ -56,13 +52,13 @@ const listBooksSchema = z.object({
 
 const bookIdParamSchema = z.object({
   params: z.object({
-    id: z.string().uuid("Geçerli bir kitap ID giriniz."),
+    id: z.uuid("Geçerli bir kitap ID giriniz."),
   }),
 });
 
 const updateBookSchema = z.object({
   params: z.object({
-    id: z.string().uuid("Geçerli bir kitap ID giriniz."),
+    id: z.uuid("Geçerli bir kitap ID giriniz."),
   }),
   body: z
     .object({
@@ -72,8 +68,8 @@ const updateBookSchema = z.object({
         .trim()
         .regex(/^[\d-]{10,17}$/)
         .optional(),
-      authorid: z.string().uuid().optional(),
-      categoryid: z.string().uuid().optional(),
+      authorid: z.uuid().optional(),
+      categoryid: z.uuid().optional(),
       description: z.string().trim().max(2000).nullable().optional(),
       publishedat: z.coerce.date().max(new Date()).nullable().optional(),
       stock: z.coerce.number().int().min(0).optional(),
