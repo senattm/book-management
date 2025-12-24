@@ -2,13 +2,14 @@ const express = require('express');
 const routes = require('./routes');
 const errorMiddleware = require('./middlewares/error.middleware');
 const { globalLimiter } = require('./middlewares/rateLimit.middleware'); // İçeri al
+const loggerMiddleware = require('./middlewares/logger.middleware');
 
 const app = express();
 
 app.set('trust proxy', 1);
-
 app.use(express.json());
 
+app.use(loggerMiddleware);
 app.use('/api', globalLimiter);
 
 app.use('/api', routes);

@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const errorMiddleware = (err, req, res, next) => {
   const statusCode = err.statusCode || 500;
 
@@ -25,9 +26,11 @@ const errorMiddleware = (err, req, res, next) => {
     path: req.originalUrl,
   };
 
-  console.error(
-    `[ERROR] ${errorResponse.error.code}: ${errorResponse.error.message}`
-  );
+ logger.error(`[ERROR] ${errorCode}: ${err.message}`, {
+    path: req.originalUrl,
+    stack: err.stack,
+    details: err.details
+  });
   return res.status(statusCode).json(errorResponse);
 };
 
