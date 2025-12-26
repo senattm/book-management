@@ -1,3 +1,202 @@
+/**
+ * @swagger
+ * /api/v1/authors:
+ *   get:
+ *     tags:
+ *       - Authors
+ *     summary: Yazar listesini getir
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Sayfa numarası
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Sayfa başına kayıt sayısı
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Yazar adında arama
+ *     responses:
+ *       200:
+ *         description: Yazar listesi başarıyla getirildi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 pagination:
+ *                   type: object
+ *       400:
+ *         description: Geçersiz parametreler
+ */
+
+/**
+ * @swagger
+ * /api/v1/authors/{id}:
+ *   get:
+ *     tags:
+ *       - Authors
+ *     summary: ID'ye göre yazar getir
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Yazar ID
+ *     responses:
+ *       200:
+ *         description: Yazar başarıyla getirildi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 biography:
+ *                   type: string
+ *                 createdat:
+ *                   type: string
+ *                   format: date-time
+ *       404:
+ *         description: Yazar bulunamadı
+ *       400:
+ *         description: Geçersiz ID formatı
+ */
+
+/**
+ * @swagger
+ * /api/v1/authors:
+ *   post:
+ *     tags:
+ *       - Authors
+ *     summary: Yeni yazar oluştur (Sadece Admin)
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Orhan Pamuk
+ *               biography:
+ *                 type: string
+ *                 example: Nobel ödüllü Türk yazar
+ *               birthdate:
+ *                 type: string
+ *                 format: date
+ *                 example: 1952-06-07
+ *     responses:
+ *       201:
+ *         description: Yazar başarıyla oluşturuldu
+ *       400:
+ *         description: Geçersiz veri
+ *       401:
+ *         description: Yetkisiz
+ *       403:
+ *         description: Admin yetkisi gerekli
+ *       409:
+ *         description: Yazar zaten mevcut
+ */
+
+/**
+ * @swagger
+ * /api/v1/authors/{id}:
+ *   put:
+ *     tags:
+ *       - Authors
+ *     summary: Yazar bilgilerini güncelle (Sadece Admin)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Yazar ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Orhan Pamuk
+ *               biography:
+ *                 type: string
+ *                 example: Güncellenmiş biyografi
+ *               birthdate:
+ *                 type: string
+ *                 format: date
+ *                 example: 1952-06-07
+ *     responses:
+ *       200:
+ *         description: Yazar başarıyla güncellendi
+ *       400:
+ *         description: Geçersiz veri veya güncellenecek alan yok
+ *       401:
+ *         description: Yetkisiz
+ *       403:
+ *         description: Admin yetkisi gerekli
+ *       404:
+ *         description: Yazar bulunamadı
+ */
+
+/**
+ * @swagger
+ * /api/v1/authors/{id}:
+ *   delete:
+ *     tags:
+ *       - Authors
+ *     summary: Yazar sil (Sadece Admin)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Yazar ID
+ *     responses:
+ *       200:
+ *         description: Yazar başarıyla silindi
+ *       401:
+ *         description: Yetkisiz
+ *       403:
+ *         description: Admin yetkisi gerekli
+ *       404:
+ *         description: Yazar bulunamadı
+ *       409:
+ *         description: Yazara ait kitaplar var, silinemez
+ */
+
 const router = require("express").Router();
 const authorController = require("../../controllers/authors.controller");
 const validate = require("../../middlewares/validate.middleware");
