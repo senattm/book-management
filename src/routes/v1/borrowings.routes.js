@@ -162,7 +162,44 @@
  *       401:
  *         description: Yetkisiz
  */
-
+/**
+ * @swagger
+ * /api/v1/borrowings:
+ *   get:
+ *     tags:
+ *       - Borrowings
+ *     summary: Ödünç kayıtlarını listele (User kendi kayıtlarını görür, Admin kullanıcıya göre filtreleyebilir)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, returned]
+ *         description: active => returnedat null, returned => returnedat dolu
+ *       - in: query
+ *         name: userid
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: (Sadece Admin) Belirli bir kullanıcının ödünç kayıtları
+ *     responses:
+ *       200:
+ *         description: Ödünç listesi
+ *       401:
+ *         description: Yetkisiz
+ */
 const router = require("express").Router();
 const borrowingController = require("../../controllers/borrowings.controller");
 const validate = require("../../middlewares/validate.middleware");
@@ -172,6 +209,7 @@ const {
   borrowingIdParamSchema,
   createBorrowingSchema,
   listOverdueSchema,
+  listBorrowingsSchema
 } = require("../../validators/borrowings.validator");
 
 router.post("/", authenticate, validate(createBorrowingSchema), borrowingController.createBorrowing);
@@ -188,6 +226,13 @@ router.get(
   authenticate,
   validate(listOverdueSchema),
   borrowingController.getOverdueBorrowings
+);
+
+router.get(
+  "/",
+  authenticate,
+  validate(listBorrowingsSchema),
+  borrowingController.listMyBorrowings
 );
 
 module.exports = router;

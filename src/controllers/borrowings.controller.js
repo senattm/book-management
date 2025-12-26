@@ -27,9 +27,17 @@ const getOverdueBorrowings = async (req, res, next) => {
     next(err);
   }
 };
-
+const listMyBorrowings = async (req, res, next) => {
+  try {
+    const result = await borrowingService.listBorrowingsByUser( req.user, req.user.id,  req.query );
+    return res.status(200).json(new ApiResponse(result.items, null, result.pagination));
+  } catch (err) {
+    next(err);
+  }
+};
 module.exports = {
   createBorrowing,
   returnBorrowing,
   getOverdueBorrowings,
+  listMyBorrowings
 };
