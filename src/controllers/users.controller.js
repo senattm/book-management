@@ -1,5 +1,6 @@
 const userService = require("../services/users.service");
 const ApiResponse = require("../utils/ApiResponse");
+const borrowingService = require("../services/borrowings.service");
 
 const getMe = async (req, res, next) => {
   try {
@@ -46,10 +47,21 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+const getUserBorrowings = async (req, res, next) => {
+  try {
+    const data = await borrowingService.listBorrowingsByUser(req.user, req.params.id, req.query
+    );
+    return res.status(200).json(new ApiResponse(data));
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getMe,
   listUsers,
   getUserById,
+getUserBorrowings,
   updateUser,
   deleteUser,
 };

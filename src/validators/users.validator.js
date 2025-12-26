@@ -30,8 +30,17 @@ const updateUserSchema = z.object({
     }),
 });
 
+const borrowingsQuerySchema = z.object({
+  query: z.object({
+    page: z.string().optional(),
+    limit: z.string().optional(),
+    status: z.enum(["active", "returned"]).optional(),
+  }),
+});
+
 module.exports = {
   userIdParamSchema,
   listUsersSchema,
   updateUserSchema,
+  borrowingsQuerySchema
 };
