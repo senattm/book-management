@@ -96,10 +96,50 @@ async function softDeleteAuthor(authorId) {
     
 }
 
+async function listAuthorBooks(authorId, queryParams) {
+  await authorExists(authorId);
+
+  const page = Number(queryParams.page ?? 1);
+  const limit = Number(queryParams.limit ?? 10);
+  const skip = (page - 1) * limit;
+
+  const where = {
+    deletedat: null,
+    authorid: authorId,
+    ...(queryParams.search
+      ? { title: { contains: queryParams.search, mode: "insensitive" } }
+      : {}),
+  };
+
+  const [items, total] = await Promise.all([
+    prisma.books.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { createdat: "desc" },
+    }),
+    prisma.books.count({ where }),
+  ]);
+
+  return {
+    items,
+    pagination: {
+      page,
+      limit,
+      totalItems: total,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page * limit < total,
+      hasPrevPage: page > 1,
+    },
+  };
+}
+
+
 module.exports = {
   createAuthor,
   listAuthors,     
   getAuthorById,
   updateAuthor,
   softDeleteAuthor,
+  listAuthorBooks
 };

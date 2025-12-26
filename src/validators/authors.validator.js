@@ -43,9 +43,20 @@ const listAuthorsSchema = z.object({
   }),
 });
 
+const listAuthorBooksSchema = z.object({
+  params: z.object({
+    id: z.uuid("Geçerli bir yazar ID giriniz."),
+  }),
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1).optional(),
+    limit: z.coerce.number().int().min(1).max(100).default(10).optional(),
+  }),
+});
+
 module.exports = {
   authorIdParamSchema,
   createAuthorSchema,
   updateAuthorSchema,
   listAuthorsSchema,
+  listAuthorBooksSchema
 };

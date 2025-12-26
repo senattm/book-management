@@ -53,10 +53,23 @@ const deleteAuthor = async (req, res, next) => {
     next(err);
   }
 };
+
+const listAuthorBooks = async (req, res, next) => {
+  try {
+    const result = await authorService.listAuthorBooks(req.params.id, req.query);
+    return res
+      .status(200)
+      .json(new ApiResponse(result.items, null, result.pagination));
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createAuthor,
   listAuthors,
   getAuthorById,
   updateAuthor,
   deleteAuthor,
+  listAuthorBooks
 };
