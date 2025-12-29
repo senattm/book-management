@@ -10,7 +10,7 @@ const userRoutes = require("./users.routes");
 const borrowingRoutes = require("./borrowings.routes");
 
 router.use("/health", healthRoutes);
-router.use("/book", bookRoutes);
+router.use("/books", bookRoutes);
 router.use("/auth", authRoutes);
 router.use("/reviews", reviewRoutes);
 router.use("/authors", authorRoutes);
