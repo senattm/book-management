@@ -14,7 +14,7 @@ const getMe = async (req, res, next) => {
 const listUsers = async (req, res, next) => {
   try {
     const data = await userService.listUsers(req.query);
-    return res.status(200).json(new ApiResponse(data));
+    return res.status(200).json(new ApiResponse(data.items, null, data.pagination));
   } catch (err) {
     next(err);
   }
@@ -49,9 +49,8 @@ const deleteUser = async (req, res, next) => {
 
 const getUserBorrowings = async (req, res, next) => {
   try {
-    const data = await borrowingService.listBorrowingsByUser(req.user, req.params.id, req.query
-    );
-    return res.status(200).json(new ApiResponse(data));
+    const data = await borrowingService.listBorrowingsByUser(req.user, req.params.id, req.query);
+    return res.status(200).json(new ApiResponse(data.items, null, data.pagination));
   } catch (err) {
     next(err);
   }

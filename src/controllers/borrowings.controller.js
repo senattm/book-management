@@ -22,7 +22,7 @@ const returnBorrowing = async (req, res, next) => {
 const getOverdueBorrowings = async (req, res, next) => {
   try {
     const data = await borrowingService.listOverdueBorrowings(req.user, req.query);
-    return res.status(200).json(new ApiResponse(data));
+    return res.status(200).json(new ApiResponse(data.items, null, data.pagination));
   } catch (err) {
     next(err);
   }
