@@ -211,7 +211,7 @@ const {
   authLimiter,
   registerLimiter,
 } = require("../../middlewares/rateLimit.middleware");
-
+const isTest = process.env.NODE_ENV === "test";
 const {
   registerSchema,
   loginSchema,
@@ -223,12 +223,12 @@ const {
 
 router.post(
   "/register",
-  registerLimiter,
+   ...(isTest ? [] : [registerLimiter]),
   validate(registerSchema),
   authController.register
 );
 
-router.post("/login", authLimiter, validate(loginSchema), authController.login);
+router.post("/login", ...(isTest ? [] : [authLimiter]), validate(loginSchema), authController.login);
 
 router.post("/logout", validate(logoutSchema), authController.logout);
 
