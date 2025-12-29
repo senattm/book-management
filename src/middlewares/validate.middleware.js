@@ -18,10 +18,14 @@ const validate = (schema) => {
       err.code = "VALIDATION_ERROR";
       const issues = error?.issues || [];
 
-      err.details = issues.map((e) => ({
-        field: (e.path || []).join("."),
-        message: e.message,
-      }));
+      err.details = issues.map((e) => {
+        const path = (e.path || []).join(".");
+        const field = path.replace(/^(body|query|params)\./, "");
+        return {
+          field,
+          message: e.message,
+        };
+      });
       next(err);
     }
   };
