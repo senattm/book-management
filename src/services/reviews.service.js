@@ -101,6 +101,13 @@ async function listReviewsByBook(bookId) {
 }
 
 async function createReview(bookId, user, payload) {
+  if (!user?.id) {
+    const err = new Error("Giriş gerekli.");
+    err.statusCode = 401;
+    err.code = "UNAUTHORIZED";
+    throw err;
+  }
+
   await bookExists(bookId);
 
   const existing = await prisma.reviews.findFirst({

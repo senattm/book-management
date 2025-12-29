@@ -95,8 +95,8 @@ async function getCategoryById(categoryId) {
   });
   if (!category) {
     const err = new Error("Kategori bulunamadı");
-    err.status = 404;
-    err.statusCode = "NOT_FOUND";
+    err.statusCode = 404;
+    err.code = "NOT_FOUND";
     throw err;
   }
   return category;

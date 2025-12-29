@@ -245,4 +245,4 @@ const resetPassword = async ({ token, password }) => {
   });
 };
 
-module.exports = { register, login, refresh, logout, forgotPassword, resetPassword };
+module.exports = { register, login, refresh, logout, forgotPassword, resetPassword, sanitizeUser };

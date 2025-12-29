@@ -85,15 +85,15 @@ async function updateUser(actor, targetUserId, payload) {
   const isAdmin = actor?.role === "admin";
   const isSelf = actor?.id === targetUserId;
 
-  if (!isAdmin && !isSelf) {
-    const err = new Error("Sadece kendi profilinizi güncelleyebilirsiniz.");
+  if (targetUser.role === "admin" && !isAdmin) {
+    const err = new Error("Admin sadece bir admin tarafından güncellenebilir.");
     err.statusCode = 403;
     err.code = "FORBIDDEN";
     throw err;
   }
 
-  if (targetUser.role === "admin" && !isAdmin) {
-    const err = new Error("Admin sadece bir admin tarafından güncellenebilir.");
+  if (!isAdmin && !isSelf) {
+    const err = new Error("Sadece kendi profilinizi güncelleyebilirsiniz.");
     err.statusCode = 403;
     err.code = "FORBIDDEN";
     throw err;
@@ -150,4 +150,4 @@ async function getMe(actor) {
 }
 
 
-module.exports = { listUsers, getUserById, updateUser, softDeleteUser, getMe };
+module.exports = { listUsers, getUserById, updateUser, softDeleteUser, getMe, sanitizeUser };
