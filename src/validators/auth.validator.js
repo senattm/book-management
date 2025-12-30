@@ -15,7 +15,7 @@ const registerSchema = z.object({
 const loginSchema = z.object({
   body: z.object({
     email: z.email("Geçersiz email formatı"),
-    password: z.string().min(1, "Şifre gereklidir"),
+    password: z.string().min(8, "Şifre gereklidir"),
   }),
 });
 
