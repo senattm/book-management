@@ -1,8 +1,16 @@
 const { prisma } = require("../config/database");
+const {
+  CacheKeys,
+  getCached,
+  invalidateBookCache,
+  invalidateAllBooksCache,
+  invalidateAuthorCache,
+  CACHE_TTL,
+  SINGLE_ITEM_TTL,
+} = require("./cache.service");
 
 async function createBook(book) {
-
-    const author = await prisma.authors.findFirst({
+  const author = await prisma.authors.findFirst({
     where: { id: book.authorid, deletedat: null },
     select: { id: true },
   });
@@ -14,7 +22,7 @@ async function createBook(book) {
     throw err;
   }
 
-   const category = await prisma.categories.findFirst({
+  const category = await prisma.categories.findFirst({
     where: { id: book.categoryid, deletedat: null },
     select: { id: true },
   });
@@ -38,78 +46,111 @@ async function createBook(book) {
   const created = await prisma.books.create({
     data: preparedData,
   });
+
+  await Promise.all([
+    invalidateAllBooksCache(),
+    invalidateAuthorCache(book.authorid),
+  ]);
+
   return created;
 }
 
 async function listBooks(query) {
-  const page = Number(query.page ?? 1);
-  const limit = Number(query.limit ?? 10);
+  const cacheKey = CacheKeys.booksList(query);
 
-  const safePage = Number.isFinite(page) && page > 0 ? page : 1;
-  const safeLimit =
-    Number.isFinite(limit) && limit > 0 && limit <= 100 ? limit : 10;
+  return getCached(
+    cacheKey,
+    async () => {
+      const page = Number(query.page ?? 1);
+      const limit = Number(query.limit ?? 10);
 
-  const skip = (safePage - 1) * safeLimit;
+      const safePage = Number.isFinite(page) && page > 0 ? page : 1;
+      const safeLimit =
+        Number.isFinite(limit) && limit > 0 && limit <= 100 ? limit : 10;
 
-  const where = {
-    deletedat: null,
-    ...(query.search
-      ? {
-          OR: [
-            { title: { contains: query.search, mode: "insensitive" } },
-            { isbn: { contains: query.search, mode: "insensitive" } },
-          ],
-        }
-      : {}),
-    ...(query.authorid ? { authorid: query.authorid } : {}),
-    ...(query.categoryid ? { categoryid: query.categoryid } : {}),
-  };
+      const skip = (safePage - 1) * safeLimit;
 
-  const [items, total] = await Promise.all([
-    prisma.books.findMany({
-      where,
-      skip,
-      take: safeLimit,          
-      orderBy: { createdat: "desc" },
-      include: { authors: true, categories: true },
-    }),
-    prisma.books.count({ where }),
-  ]);
+      const where = {
+        deletedat: null,
+        ...(query.search
+          ? {
+              OR: [
+                { title: { contains: query.search, mode: "insensitive" } },
+                { isbn: { contains: query.search, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+        ...(query.authorid ? { authorid: query.authorid } : {}),
+        ...(query.categoryid ? { categoryid: query.categoryid } : {}),
+      };
 
-  return {
-    items,
-    pagination: {
-      page: safePage,
-      limit: safeLimit,
-      totalItems: total,
-      totalPages: Math.ceil(total / safeLimit),
-      hasNextPage: safePage * safeLimit < total,
-      hasPrevPage: safePage > 1,
+      const [items, total] = await Promise.all([
+        prisma.books.findMany({
+          where,
+          skip,
+          take: safeLimit,
+          orderBy: { createdat: "desc" },
+          include: { authors: true, categories: true },
+        }),
+        prisma.books.count({ where }),
+      ]);
+
+      return {
+        items,
+        pagination: {
+          page: safePage,
+          limit: safeLimit,
+          totalItems: total,
+          totalPages: Math.ceil(total / safeLimit),
+          hasNextPage: safePage * safeLimit < total,
+          hasPrevPage: safePage > 1,
+        },
+      };
     },
-  };
+    CACHE_TTL
+  );
 }
 
+
 async function getBookById(id) {
-  const book = await prisma.books.findFirst({
-    where: { id, deletedat: null },
-    include: {
-      authors: true,
-      categories: true,
+  const cacheKey = CacheKeys.book(id);
+
+  return getCached(
+    cacheKey,
+    async () => {
+      const book = await prisma.books.findFirst({
+        where: { id, deletedat: null },
+        include: {
+          authors: true,
+          categories: true,
+        },
+      });
+
+      if (!book) {
+        const err = new Error("Kitap bulunamadı.");
+        err.statusCode = 404;
+        err.code = "NOT_FOUND";
+        throw err;
+      }
+
+      return book;
     },
+    SINGLE_ITEM_TTL
+  );
+}
+
+async function updateBook(id, data) {
+  const existing = await prisma.books.findFirst({
+    where: { id, deletedat: null },
+    select: { id: true, authorid: true, categoryid: true },
   });
 
-  if (!book) {
+  if (!existing) {
     const err = new Error("Kitap bulunamadı.");
     err.statusCode = 404;
     err.code = "NOT_FOUND";
     throw err;
   }
-
-  return book;
-}
-
-async function updateBook(id, data) {
-  await getBookById(id);
 
   if (data.authorid !== undefined) {
     const author = await prisma.authors.findFirst({
@@ -142,7 +183,9 @@ async function updateBook(id, data) {
     ...(data.isbn !== undefined ? { isbn: data.isbn.trim() } : {}),
     ...(data.authorid !== undefined ? { authorid: data.authorid } : {}),
     ...(data.categoryid !== undefined ? { categoryid: data.categoryid } : {}),
-    ...(data.description !== undefined ? { description: data.description ?? null } : {}),
+    ...(data.description !== undefined
+      ? { description: data.description ?? null }
+      : {}),
     ...(data.publishedat !== undefined
       ? { publishedat: data.publishedat ? new Date(data.publishedat) : null }
       : {}),
@@ -155,38 +198,68 @@ async function updateBook(id, data) {
     data: prepared,
   });
 
+  const invalidationPromises = [invalidateBookCache(id)];
+
+  if (data.authorid !== undefined && data.authorid !== existing.authorid) {
+    invalidationPromises.push(invalidateAuthorCache(data.authorid));
+    invalidationPromises.push(invalidateAuthorCache(existing.authorid));
+  } else if (!data.authorid) {
+    invalidationPromises.push(invalidateAuthorCache(existing.authorid));
+  }
+
+  await Promise.all(invalidationPromises);
+
   return updated;
 }
 
-
 async function softDeleteBook(id) {
-  await getBookById(id);
+  const existing = await prisma.books.findFirst({
+    where: { id, deletedat: null },
+    select: { id: true, authorid: true },
+  });
+
+  if (!existing) {
+    const err = new Error("Kitap bulunamadı.");
+    err.statusCode = 404;
+    err.code = "NOT_FOUND";
+    throw err;
+  }
 
   const deleted = await prisma.books.update({
     where: { id },
     data: { deletedat: new Date(), updatedat: new Date() },
   });
 
+  await Promise.all([
+    invalidateBookCache(id),
+    invalidateAuthorCache(existing.authorid),
+  ]);
+
   return deleted;
 }
 
 async function getBookReviews(id) {
-  await getBookById(id); 
+  await getBookById(id);
 
+  const cacheKey = CacheKeys.bookReviews(id);
 
-  const reviews = await prisma.reviews.findMany({
-    where: { 
-      bookid: id, 
-      deletedat: null 
+  return getCached(
+    cacheKey,
+    async () => {
+      return await prisma.reviews.findMany({
+        where: {
+          bookid: id,
+          deletedat: null,
+        },
+        include: {
+          users: {
+            select: { name: true },
+          },
+        },
+      });
     },
-    include: { 
-      users: { 
-        select: { name: true } 
-      } 
-    }
-  });
-
-  return reviews;
+    CACHE_TTL
+  );
 }
 
 module.exports = {
@@ -195,5 +268,5 @@ module.exports = {
   getBookById,
   updateBook,
   softDeleteBook,
-  getBookReviews
+  getBookReviews,
 };
