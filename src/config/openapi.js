@@ -19,6 +19,7 @@ function getOpenApiSpec() {
   require("../validators/categories.validator");
   require("../validators/reviews.validator");
   require("../validators/users.validator");
+  require("../validators/health.validator");
 
   const generator = new OpenApiGeneratorV3(registry.definitions);
 
